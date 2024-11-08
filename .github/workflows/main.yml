@@ -1,24 +1,39 @@
-name: build
-on: push
+name: Build and Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
   test:
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    steps:
-      - name: Check out repository code
-        uses: actions/checkout@v2
 
-      - name: Setup Python
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+     
+      - name: Set up Python
         uses: actions/setup-python@v2
         with:
           python-version: "3.11"
-      - name: Install pipenv
-        run: |
-          python -m pip install --upgrade pipenv wheel
+     
       - name: Install dependencies
         run: |
-          pipenv install --deploy --dev
-      - name: Run test suite
+          python -m pip install --upgrade pip pipenv
+          pipenv install --dev
+     
+      - name: Run tests with coverage
         run: |
-          pipenv run pytest
+          pipenv run pytest --cov=.
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v3  # Cambiado a v3
+        with:
+          name: coverage-report
+          path: htmlcov/  # Cambia este path si tienes otro para el reporte de cobertura   
+
